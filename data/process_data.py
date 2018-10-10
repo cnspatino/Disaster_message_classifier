@@ -63,10 +63,10 @@ def save_data(df, database_filename):
     Outputs: None
     """
     # create database engine
-    engine = create_engine('sqlite:///DisasterResponse.db')
+    engine = create_engine('sqlite:///database_filename')
 
     # connect to database
-    conn = sqlite3.connect('DisasterResponse.db')
+    conn = sqlite3.connect(database_filename)
     
     # set text_factory so it can interpret 8-bit bytestrings
     conn.text_factory = str
