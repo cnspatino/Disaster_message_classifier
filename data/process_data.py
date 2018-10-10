@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
+import sqlite3
 
 
 def load_data(messages_filepath, categories_filepath):
@@ -61,9 +62,17 @@ def save_data(df, database_filename):
     Inputs: df (pandas dataframe), database_filename (string)
     Outputs: None
     """
+    # create database engine
     engine = create_engine('sqlite:///DisasterResponse.db')
+
+    # connect to database
+    conn = sqlite3.connect('DisasterResponse.db')
+    
+    # set text_factory so it can interpret 8-bit bytestrings
+    conn.text_factory = str
+    
     # save as sql table
-    df.to_sql('MessageClassification', engine, index=False)
+    df.to_sql('MessageClassification', conn, index=False)
 
 
 def main():
