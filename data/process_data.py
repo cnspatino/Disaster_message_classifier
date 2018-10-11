@@ -13,7 +13,6 @@ def load_data(messages_filepath, categories_filepath):
     Output: df (pandas dataframe)
 
     """
-
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
@@ -62,17 +61,11 @@ def save_data(df, database_filename):
     Inputs: df (pandas dataframe), database_filename (string)
     Outputs: None
     """
-    # create database engine
-    engine = create_engine('sqlite:///database_filename')
-
-    # connect to database
-    conn = sqlite3.connect(database_filename)
-    
-    # set text_factory so it can interpret 8-bit bytestrings
-    conn.text_factory = str
+    # create and connect to database engine
+    engine = create_engine('sqlite:///{}'.format(database_filename))
     
     # save as sql table
-    df.to_sql('MessageClassification', conn, index=False)
+    df.to_sql('MessageClassification', engine, if_exists = 'fail', index=False)
 
 
 def main():
