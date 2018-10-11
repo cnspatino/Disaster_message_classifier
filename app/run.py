@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('MessageClassification', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -39,19 +39,32 @@ model = joblib.load("../models/your_model_name.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+
+    # extract genre data
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
+    # extract data for columns that include 'related'
+    related = df[['aid_related','infrastructure_related','weather_related']].sum().reset_index()
+    related.columns = ['category','count']
+    related_categories = related.category.values.tolist()
+    related_counts = related['count'].values.tolist()
+
+    # extract weather-related data
+    weather = df[['floods','storm','fire','earthquake','cold','other_weather']].sum().reset_index()
+    weather.columns = ['category','count']
+    weather_categories = weather.category.values.tolist()
+    weather_counts = weather['count'].values.tolist()
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+    
     graphs = [
         {
             'data': [
                 Bar(
                     x=genre_names,
                     y=genre_counts
-                )
+                )   
             ],
 
             'layout': {
@@ -61,6 +74,42 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=related_categories,
+                    y=related_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Category Types',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category Type"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=weather_categories,
+                    y=weather_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Weather-related Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Weather Category"
                 }
             }
         }
