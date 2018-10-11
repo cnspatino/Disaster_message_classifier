@@ -5,6 +5,7 @@ nltk.download('wordnet')
 
 import pandas as pd
 from sqlalchemy import create_engine
+import sqlite3
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import re
@@ -24,16 +25,19 @@ def load_data(database_filepath):
     and then splits the data into features and target.
 
     Input: database_filepath (string)
-    Outputs: X (features array), Y (target variables array)
+    Outputs: X (features array), Y (target variables array), categories (list of category names)
     """
-    engine = create_engine(database_filepath)
-    df = read_sql_table('MessageClassification', engine)
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df = pd.read_sql_table('MessageClassification', engine)
 
     # designate features array and target array
     X = df['message'].values
     Y = df.drop(['id','message','original','genre'], axis=1).values
 
-    return X, Y
+    # get list of category names
+    categories = df.drop(['id','message','original','genre'], axis=1).columns.values.tolist()
+
+    return X, Y, categories
 
 
 def tokenize(text):
@@ -91,8 +95,8 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_preds = model.predict(X_test)
 
     # convert Y arrays to dataframes
-    Y_preds = pd.DataFrame(Y_preds, columns = categories_names)
-    Y_test = pd.DataFrame(Y_test, columns = categories_names)
+    Y_preds = pd.DataFrame(Y_preds, columns = category_names)
+    Y_test = pd.DataFrame(Y_test, columns = category_names)
 
     for column in Y_preds:
         accuracy = accuracy_score(Y_test[column], Y_preds[column])
